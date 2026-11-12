@@ -8,13 +8,19 @@
 <style>
 :root{
   --navy:#14305a; --green:#2f6b2f; --green-l:#e6f0e3; --navy-l:#e4eaf4; --amber-l:#fbf0d9; --amber:#b87a07;
-  --bg:#f5f6f3; --card:#fff; --text:#1c2430; --muted:#7a838f; --line:#e6e8e1; --field:#f4f5f2;
+  --bg:#f5f6f3; --card:rgba(255,255,255,.80); --text:#1c2430; --muted:#7a838f; --line:#e6e8e1; --field:#f4f5f2;
   --c-cliente:#2563a8; --c-potencial:#c9860a; --c-apartado:#7a4fb3; --c-vendido:#2f6b2f; --c-descartado:#7b8290;
   --r:18px; --shadow:0 1px 2px rgba(20,48,90,.06),0 6px 18px rgba(20,48,90,.05);
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:16px}
-body{padding-bottom:calc(84px + env(safe-area-inset-bottom))}
+body{padding-bottom:calc(84px + env(safe-area-inset-bottom));background:transparent}
+/* fondo animado: el lienzo va detrás de todo; la app y el acceso quedan por encima */
+#bg{position:fixed;top:0;left:0;width:100%;height:100%;height:100lvh;z-index:0;pointer-events:none;display:block}
+#app,#auth{position:relative;z-index:1}
+/* tarjetas tipo cristal: dejan ver el movimiento del fondo sin perder legibilidad */
+.card,.act,.stat,.citem,.mini{-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.panel .card{-webkit-backdrop-filter:none;backdrop-filter:none;background:#fff}
 [hidden]{display:none!important}
 button{font:inherit;cursor:pointer;color:inherit}
 input,select,textarea{font:inherit;width:100%;padding:12px;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--text)}
@@ -34,7 +40,7 @@ label{display:block;font-size:13px;color:var(--muted);margin:12px 0 5px;font-wei
 .muted{color:var(--muted);font-size:13px}
 
 /* ---------- acceso ---------- */
-#auth{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;background:linear-gradient(180deg,#fff,var(--green-l))}
+#auth{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px}
 #auth .box{width:100%;max-width:380px;background:#fff;border-radius:22px;padding:24px;box-shadow:0 10px 30px rgba(20,48,90,.12)}
 #auth .logo{display:block;max-width:100%;max-height:120px;margin:0 auto 14px}
 .brand-fallback{font-family:Georgia,serif;text-align:center;color:var(--navy);margin-bottom:14px}
@@ -46,8 +52,24 @@ label{display:block;font-size:13px;color:var(--muted);margin:12px 0 5px;font-wei
 .err{color:#b3261e;font-size:13px;margin-top:10px;min-height:18px}
 .warn{background:#fff6e0;border:1px solid #f0d58a;color:#7a5a00;padding:10px 12px;border-radius:10px;font-size:13px;margin-bottom:12px}
 
+/* ---------- opciones de fondo (Más) ---------- */
+.anims{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.aopt{border:1.5px solid transparent;background:var(--field);border-radius:14px;padding:12px 4px 10px;display:flex;flex-direction:column;align-items:center;gap:7px;font-size:12px;font-weight:700;color:#4a5361}
+.aopt .ic{width:26px;height:26px}
+.aopt.on{background:var(--navy);color:#fff}
+.swatches{display:flex;flex-wrap:wrap;gap:10px;margin-top:4px}
+.cdot{position:relative;width:38px;height:38px;border-radius:50%;border:0;padding:0;display:grid;place-items:center;color:#fff;box-shadow:inset 0 0 0 1px rgba(0,0,0,.08)}
+.cdot .ic{width:19px;height:19px;stroke-width:2.6;filter:drop-shadow(0 1px 1px rgba(0,0,0,.35))}
+.cdot .ck{display:none}
+.cdot.on{box-shadow:0 0 0 3px #fff,0 0 0 5px var(--navy)}
+.cdot.on .ck{display:block}
+.cdot.custom{margin:0;background:conic-gradient(#e0412f,#e3b04b,#4fa34f,#3f8fc4,#7a4fb3,#e0412f);cursor:pointer;overflow:hidden}
+.cdot.custom input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;padding:0;border:0}
+.cdot.custom.on .pl{display:none}
+.cname{font-size:13px;color:var(--muted);margin-top:12px}
+
 /* ---------- barra superior ---------- */
-.top{position:sticky;top:0;z-index:20;background:var(--bg);padding:12px 16px;padding-top:calc(12px + env(safe-area-inset-top))}
+.top{position:sticky;top:0;z-index:20;background:rgba(245,246,243,.78);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);padding:12px 16px;padding-top:calc(12px + env(safe-area-inset-top))}
 .topin{max-width:640px;margin:0 auto;display:flex;align-items:center;gap:12px}
 .avatar{width:48px;height:48px;border-radius:50%;background:#fff;border:1px solid var(--line);display:grid;place-items:center;overflow:hidden;flex:none;font-family:Georgia,serif;font-weight:700;font-size:22px;color:var(--navy)}
 .avatar img{width:100%;height:100%;object-fit:contain;padding:3px}
@@ -261,7 +283,14 @@ dialog.sheet[open]{animation:up .22s ease}
 <symbol id="i-map-pin" viewBox="0 0 24 24"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></symbol>
 <symbol id="i-tag" viewBox="0 0 24 24"><path d="M12.6 2.6A2 2 0 0 0 11.2 2H4a2 2 0 0 0-2 2v7.2a2 2 0 0 0 .6 1.4l8.7 8.7a2 2 0 0 0 2.8 0l6.4-6.4a2 2 0 0 0 0-2.8z"/><circle cx="7.5" cy="7.5" r=".5"/></symbol>
 <symbol id="i-chevron-down" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+<symbol id="i-dots" viewBox="0 0 24 24"><path stroke-width="1.4" d="M6 7l6 6M17 5l-5 8M12 13l7 4M12 13l-7 5"/><circle cx="6" cy="7" r="1.7" fill="currentColor"/><circle cx="17" cy="5" r="1.7" fill="currentColor"/><circle cx="12" cy="13" r="1.7" fill="currentColor"/><circle cx="19" cy="17" r="1.7" fill="currentColor"/><circle cx="5" cy="18" r="1.7" fill="currentColor"/></symbol>
+<symbol id="i-circles" viewBox="0 0 24 24"><circle cx="9" cy="14" r="5.5"/><circle cx="16.5" cy="7.5" r="3.5"/><circle cx="18" cy="17.5" r="2"/></symbol>
+<symbol id="i-waves" viewBox="0 0 24 24"><path d="M2 6c.6.5 1.2 1 2.5 1C7 7 7 5 9.5 5c2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/><path d="M2 12c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/><path d="M2 18c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/></symbol>
+<symbol id="i-ban" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m4.9 4.9 14.2 14.2"/></symbol>
+<symbol id="i-palette" viewBox="0 0 24 24"><circle cx="13.5" cy="6.5" r="1" fill="currentColor"/><circle cx="17.5" cy="10.5" r="1" fill="currentColor"/><circle cx="8.5" cy="7.5" r="1" fill="currentColor"/><circle cx="6.5" cy="12.5" r="1" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></symbol>
 </defs></svg>
+
+<canvas id="bg" aria-hidden="true"></canvas>
 
 <!-- ============ ACCESO ============ -->
 <section id="auth">
@@ -379,8 +408,20 @@ dialog.sheet[open]{animation:up .22s ease}
         <div class="row"><input id="myWa" inputmode="tel" placeholder="10 dígitos"><button class="btn green" id="saveWa" type="button">Guardar</button></div>
         <p class="muted" style="margin:10px 0 0">Se usa en el botón “Avisarme” de cada cita.</p>
       </div>
+      <div class="card">
+        <h3 class="ch"><i data-ic="palette"></i>Fondo animado</h3>
+        <label style="margin-top:0">Movimiento</label>
+        <div class="anims" id="animOpts"></div>
+        <label style="margin-top:18px">Color</label>
+        <div class="swatches" id="colorOpts"></div>
+        <div class="cname" id="colorName"></div>
+        <div class="row" style="margin-top:12px;justify-content:space-between">
+          <span class="muted">Se guarda en este dispositivo.</span>
+          <button class="link" id="fondoReset" type="button">Restablecer</button>
+        </div>
+      </div>
       <button class="btn danger" style="width:100%" id="logoutBtn" type="button"><i data-ic="logout"></i>Cerrar sesión</button>
-      <p class="muted" style="text-align:center;margin-top:24px">Sendero del Bosque · Panel de clientes</p>
+      <p class="muted" style="text-align:center;margin-top:24px;color:#3d4756;font-weight:600">Sendero del Bosque · Panel de clientes</p>
     </section>
   </main>
 
@@ -1072,6 +1113,180 @@ $("nDel").onclick = () => {
 };
 
 function renderAll() { renderHome(); renderClients(); renderDetail(); renderCalendar(); renderNotes(); renderBell(); }
+/* ============ FONDO ANIMADO ============ */
+const ESCUDO = ["#3a8a3a", "#1f4e8c", "#3f9bd6", "#eab63f"];   /* verde bosque, azul marino, lago y sol del escudo */
+const COLORES = [["escudo", "Colores del escudo"], ["#2f6b2f", "Verde bosque"], ["#14305a", "Azul marino"], ["#d9a21b", "Dorado"], ["#d0643a", "Terracota"], ["#7a4fb3", "Morado"]];
+const ANIMS = [["puntos", "Puntos", "dots"], ["circulos", "Círculos", "circles"], ["ondas", "Ondas", "waves"], ["ninguna", "Ninguna", "ban"]];
+const FONDO_BASE = { anim: "ondas", color: "escudo" };
+
+function cargarFondo() {
+  let s = null;
+  try { s = JSON.parse(localStorage.getItem("fondo") || "null"); } catch (e) {}
+  if (s && ANIMS.some((a) => a[0] === s.anim) && (s.color === "escudo" || /^#[0-9a-f]{6}$/i.test(s.color))) return { anim: s.anim, color: s.color };
+  const reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+  return { ...FONDO_BASE, anim: reduce ? "ninguna" : FONDO_BASE.anim };
+}
+function guardarFondo() { try { localStorage.setItem("fondo", JSON.stringify(fondo)); } catch (e) {} }
+let fondo = cargarFondo(), PAL = ESCUDO, PR = [];
+
+/* colores */
+const hex2rgb = (h) => { const n = parseInt(h.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; };
+function rgb2hsl(r, g, b) {
+  r /= 255; g /= 255; b /= 255;
+  const mx = Math.max(r, g, b), mn = Math.min(r, g, b), d = mx - mn, l = (mx + mn) / 2;
+  let h = 0, s = 0;
+  if (d) {
+    s = l > .5 ? d / (2 - mx - mn) : d / (mx + mn);
+    h = mx === r ? (g - b) / d + (g < b ? 6 : 0) : mx === g ? (b - r) / d + 2 : (r - g) / d + 4;
+    h *= 60;
+  }
+  return [h, s * 100, l * 100];
+}
+function hsl2hex(h, s, l) {
+  s /= 100; l /= 100;
+  const k = (n) => (n + h / 30) % 12, a = s * Math.min(l, 1 - l);
+  const f = (n) => l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)));
+  const to = (x) => Math.round(x * 255).toString(16).padStart(2, "0");
+  return "#" + to(f(0)) + to(f(8)) + to(f(4));
+}
+function calcPal() {
+  if (fondo.color === "escudo") PAL = ESCUDO;
+  else {
+    let [h, s, l] = rgb2hsl(...hex2rgb(fondo.color));
+    l = Math.min(Math.max(l, 30), 58); s = Math.max(s, 35);
+    PAL = [hsl2hex(h, s, l), hsl2hex(h, s, Math.min(l + 16, 72)), hsl2hex(h, s, Math.max(l - 14, 18)), hsl2hex((h + 28) % 360, s, l)];
+  }
+  PR = PAL.map(hex2rgb);
+}
+const col = (i, a) => `rgba(${PR[i][0]},${PR[i][1]},${PR[i][2]},${a})`;
+
+/* animaciones sobre un lienzo fijo */
+const cv = $("bg"), cx = cv.getContext("2d");
+let W = 0, H = 0, items = [], raf = 0, lastTs = 0, tt = 0;
+const rnd = (a, b) => a + Math.random() * (b - a);
+
+function initItems() {
+  items = [];
+  if (fondo.anim === "puntos") {
+    const n = Math.max(32, Math.min(90, Math.floor(W * H / 11000)));
+    for (let i = 0; i < n; i++) items.push({ x: rnd(0, W), y: rnd(0, H), vx: rnd(-18, 18), vy: rnd(-18, 18), r: rnd(2.6, 5.2), c: i % 4 });
+  } else if (fondo.anim === "circulos") {
+    const n = Math.max(12, Math.min(28, Math.floor(W / 22)));
+    for (let i = 0; i < n; i++) items.push({ x: rnd(0, W), y: rnd(0, H), r: rnd(20, 95), vy: rnd(14, 34), ph: rnd(0, 6.28), sw: rnd(8, 28), c: i % 4, a: rnd(.20, .36) });
+  }
+}
+function drawBase() {
+  cx.fillStyle = "#f5f6f3"; cx.fillRect(0, 0, W, H);
+  const g = cx.createLinearGradient(0, 0, 0, H);
+  g.addColorStop(0, col(0, .26)); g.addColorStop(.5, col(2, .10)); g.addColorStop(1, col(3, .22));
+  cx.fillStyle = g; cx.fillRect(0, 0, W, H);
+}
+function drawPuntos(dt) {
+  const maxD = Math.min(155, W / 2.3), max2 = maxD * maxD;
+  for (const p of items) {
+    p.x += p.vx * dt; p.y += p.vy * dt;
+    if (p.x < -10) p.x = W + 10; else if (p.x > W + 10) p.x = -10;
+    if (p.y < -10) p.y = H + 10; else if (p.y > H + 10) p.y = -10;
+  }
+  cx.lineWidth = 1;
+  for (let i = 0; i < items.length; i++) for (let j = i + 1; j < items.length; j++) {
+    const a = items[i], b = items[j], dx = a.x - b.x, dy = a.y - b.y, d2 = dx * dx + dy * dy;
+    if (d2 < max2) {
+      cx.strokeStyle = col((i + j) % 3, (.5 * (1 - Math.sqrt(d2) / maxD)).toFixed(3));
+      cx.beginPath(); cx.moveTo(a.x, a.y); cx.lineTo(b.x, b.y); cx.stroke();
+    }
+  }
+  for (const p of items) { cx.fillStyle = col(p.c, .85); cx.beginPath(); cx.arc(p.x, p.y, p.r, 0, 6.2832); cx.fill(); }
+}
+function drawCirculos(dt) {
+  cx.lineWidth = 1.5;
+  for (const c of items) {
+    c.y -= c.vy * dt;
+    if (c.y + c.r < -4) { c.y = H + c.r + rnd(0, 40); c.x = rnd(0, W); }
+    cx.beginPath(); cx.arc(c.x + Math.sin(tt * .5 + c.ph) * c.sw, c.y, c.r, 0, 6.2832);
+    cx.fillStyle = col(c.c, c.a.toFixed(3)); cx.fill();
+    cx.strokeStyle = col(c.c, Math.min(.55, c.a + .16).toFixed(3)); cx.stroke();
+  }
+}
+const OND = [
+  { top: true,  y: .07, amp: 16, len: 300, spd: 20,  c: 2, a: .30 },
+  { top: false, y: .60, amp: 30, len: 380, spd: 22,  c: 3, a: .26 },
+  { top: false, y: .70, amp: 34, len: 320, spd: -30, c: 2, a: .28 },
+  { top: false, y: .80, amp: 30, len: 260, spd: 40,  c: 0, a: .32 },
+  { top: false, y: .90, amp: 24, len: 210, spd: -55, c: 1, a: .34 }
+];
+function drawOndas() {
+  const k = Math.max(.7, W / 390);
+  for (const o of OND) {
+    const base = H * o.y, len = o.len * k, amp = o.amp * Math.min(k, 1.4), edge = o.top ? 0 : H;
+    cx.beginPath(); cx.moveTo(0, edge);
+    for (let x = 0; x <= W + 8; x += 8) {
+      const ph = ((x + tt * o.spd) / len) * 6.2832;
+      cx.lineTo(x, base + Math.sin(ph) * amp + Math.sin(ph * 2.3 + 1) * amp * .3);
+    }
+    cx.lineTo(W, edge); cx.closePath();
+    cx.fillStyle = col(o.c, o.a); cx.fill();
+  }
+}
+function draw(dt) {
+  drawBase();
+  if (fondo.anim === "puntos") drawPuntos(dt);
+  else if (fondo.anim === "circulos") drawCirculos(dt);
+  else if (fondo.anim === "ondas") drawOndas();
+}
+function ciclo(ts) {
+  raf = requestAnimationFrame(ciclo);
+  if (ts - lastTs < 32) return;                       /* ~30 cuadros por segundo: cuida la batería */
+  const dt = Math.min((ts - lastTs) / 1000, .1); lastTs = ts; tt += dt;
+  draw(dt);
+}
+function arrancarFondo() {
+  cancelAnimationFrame(raf); raf = 0;
+  initItems(); draw(0);
+  if (fondo.anim !== "ninguna") { lastTs = performance.now(); raf = requestAnimationFrame(ciclo); }
+}
+function medirFondo() {
+  const w = cv.clientWidth, h = cv.clientHeight;
+  if (!w || !h || (w === W && h === H)) return;
+  const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+  W = w; H = h;
+  cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+  cx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  initItems(); draw(0);
+}
+let rsz = 0;
+addEventListener("resize", () => { clearTimeout(rsz); rsz = setTimeout(medirFondo, 120); });
+
+/* opciones en "Más" */
+function buildFondoUI() {
+  $("animOpts").innerHTML = ANIMS.map(([k, n, i]) => `<button type="button" class="aopt" data-a="${k}">${ic(i)}<span>${n}</span></button>`).join("");
+  $("animOpts").querySelectorAll("button").forEach((b) => b.onclick = () => { fondo.anim = b.dataset.a; guardarFondo(); arrancarFondo(); syncFondoUI(); });
+  const ck = ic("check").replace('class="ic"', 'class="ic ck"');
+  $("colorOpts").innerHTML = COLORES.map(([k, n]) =>
+    `<button type="button" class="cdot" data-c="${k}" aria-label="${esc(n)}" title="${esc(n)}" style="background:${k === "escudo" ? "conic-gradient(" + ESCUDO.concat(ESCUDO[0]).join(",") + ")" : k}">${ck}</button>`).join("") +
+    `<label class="cdot custom" title="Elegir otro color"><input type="color" id="colorPick" value="#2f6b2f" aria-label="Elegir otro color">${ic("plus").replace('class="ic"', 'class="ic pl"')}${ck}</label>`;
+  $("colorOpts").querySelectorAll("button.cdot").forEach((b) => b.onclick = () => { fondo.color = b.dataset.c; calcPal(); guardarFondo(); draw(0); syncFondoUI(); });
+  const pk = $("colorPick");
+  pk.oninput = () => { fondo.color = pk.value; calcPal(); if (fondo.anim === "ninguna") draw(0); syncFondoUI(); };
+  pk.onchange = guardarFondo;
+  $("fondoReset").onclick = () => { fondo = { ...FONDO_BASE }; calcPal(); guardarFondo(); arrancarFondo(); syncFondoUI(); toast("Fondo restablecido"); };
+}
+function syncFondoUI() {
+  $("animOpts").querySelectorAll("button").forEach((b) => b.classList.toggle("on", b.dataset.a === fondo.anim));
+  let preset = false;
+  $("colorOpts").querySelectorAll("button.cdot").forEach((b) => {
+    const on = b.dataset.c.toLowerCase() === fondo.color.toLowerCase();
+    if (on) preset = true; b.classList.toggle("on", on);
+  });
+  const cu = $("colorOpts").querySelector(".custom");
+  cu.classList.toggle("on", !preset);
+  cu.style.background = preset ? "" : fondo.color;
+  if (!preset && $("colorPick").value.toLowerCase() !== fondo.color.toLowerCase()) $("colorPick").value = fondo.color;
+  const nom = (COLORES.find((c) => c[0] === fondo.color.toLowerCase()) || [0, "Personalizado"])[1];
+  $("colorName").innerHTML = `Color elegido: <b style="color:var(--text)">${esc(nom)}</b>${fondo.color === "escudo" ? " · predeterminado" : ""}`;
+}
+calcPal(); buildFondoUI(); syncFondoUI(); medirFondo(); arrancarFondo();
+
 renderAll();
 </script>
 </body>
